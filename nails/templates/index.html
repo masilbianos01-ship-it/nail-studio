@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Πελάτες{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Πελάτες</h1>
+        <p class="subtitle">{{ clients|length }} πελάτ{{ 'ης' if clients|length == 1 else 'ες' }} καταχωρημέν{{ 'ος' if clients|length == 1 else 'οι' }}</p>
+    </div>
+    <a href="{{ url_for('new_client') }}" class="btn btn-primary">+ Νέος Πελάτης</a>
+</div>
+
+<form method="get" action="{{ url_for('index') }}" class="search-bar">
+    <input type="text" name="q" placeholder="Αναζήτηση με όνομα, τηλέφωνο ή email..." value="{{ query }}">
+    <button type="submit" class="btn btn-secondary">Αναζήτηση</button>
+    {% if query %}
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Καθαρισμός</a>
+    {% endif %}
+</form>
+
+{% if clients|length == 0 %}
+    <div class="empty-state">
+        <div class="icon">💅</div>
+        {% if query %}
+            <p>Δεν βρέθηκαν πελάτες για «{{ query }}».</p>
+        {% else %}
+            <p>Δεν υπάρχουν ακόμα πελάτες. Πρόσθεσε τον πρώτο σου πελάτη!</p>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="client-list">
+        {% for entry in clients %}
+            {% set c = entry.client %}
+            <a href="{{ url_for('client_detail', client_id=c.id) }}" class="client-card">
+                <div>
+                    <div class="client-name">{{ c.full_name }}</div>
+                    <div class="client-meta">
+                        {{ c.phone or '—' }}{% if c.email %} · {{ c.email }}{% endif %}
+                    </div>
+                </div>
+                <div class="client-last-visit">
+                    {% if entry.last_visit %}
+                        <strong>{{ entry.last_visit.service }}</strong>
+                        {{ entry.last_visit.visit_date }}
+                    {% else %}
+                        Καμία επίσκεψη ακόμα
+                    {% endif %}
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}

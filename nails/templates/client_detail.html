@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ client.full_name }}{% endblock %}
+{% block content %}
+
+<div class="profile-card">
+    <h1>{{ client.full_name }}</h1>
+    <div class="profile-grid">
+        <div>
+            <div class="field-label">Τηλέφωνο</div>
+            <div>{{ client.phone or '—' }}</div>
+        </div>
+        <div>
+            <div class="field-label">Email</div>
+            <div>{{ client.email or '—' }}</div>
+        </div>
+        {% if client.notes %}
+        <div style="grid-column: 1 / -1;">
+            <div class="field-label">Σημειώσεις / Προτιμήσεις</div>
+            <div>{{ client.notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if client.allergies %}
+        <div class="allergy-badge">⚠️ Αλλεργίες/Ευαισθησίες: {{ client.allergies }}</div>
+    {% endif %}
+
+    <div class="profile-actions">
+        <a href="{{ url_for('edit_client', client_id=client.id) }}" class="btn btn-secondary btn-small">Επεξεργασία Στοιχείων</a>
+        <form method="post" action="{{ url_for('delete_client', client_id=client.id) }}"
+              onsubmit="return confirm('Σίγουρα θέλεις να διαγράψεις τον πελάτη {{ client.full_name }} και όλο το ιστορικό του;');">
+            <button type="submit" class="btn btn-danger btn-small">Διαγραφή Πελάτη</button>
+        </form>
+    </div>
+</div>
+
+<div class="section-header">
+    <h2>Ιστορικό Επισκέψεων</h2>
+    <a href="{{ url_for('new_visit', client_id=client.id) }}" class="btn btn-primary btn-small">+ Νέα Επίσκεψη</a>
+</div>
+
+{% if visits|length == 0 %}
+    <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>Δεν υπάρχουν καταχωρημένες επισκέψεις ακόμα.</p>
+    </div>
+{% else %}
+    <div class="visit-list">
+        {% for v in visits %}
+            <div class="visit-card">
+                <div class="visit-top">
+                    <div>
+                        <span class="visit-date">{{ v.visit_date }}</span> —
+                        <span class="visit-service">{{ v.service }}</span>
+                    </div>
+                    {% if v.price %}
+                        <div class="visit-price">{{ "%.2f"|format(v.price) }} €</div>
+                    {% endif %}
+                </div>
+                {% if v.color_design or v.notes %}
+                    <div class="visit-details">
+                        {% if v.color_design %}🎨 {{ v.color_design }}{% endif %}
+                        {% if v.color_design and v.notes %}<br>{% endif %}
+                        {% if v.notes %}📝 {{ v.notes }}{% endif %}
+                    </div>
+                {% endif %}
+                <div class="visit-actions">
+                    <a href="{{ url_for('edit_visit', visit_id=v.id) }}" class="btn btn-secondary btn-small">Επεξεργασία</a>
+                    <form method="post" action="{{ url_for('delete_visit', visit_id=v.id) }}"
+                          onsubmit="return confirm('Διαγραφή αυτής της επίσκεψης;');">
+                        <button type="submit" class="btn btn-danger btn-small">Διαγραφή</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div style="margin-top: 28px;">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">← Πίσω στη λίστα</a>
+</div>
+
+{% endblock %}
